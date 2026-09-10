@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank</title>
+    <style>
+        table, th, td {
+          border: 1px solid black;
+          border-collapse: collapse;
+        }
+        th, td {
+          max-width: 150px;
+          word-wrap: break-word;
+          padding: 5px;
+          text-align: left;    
+        }
+
+        .botton{
+            padding: 5px;
+            color: white;
+            border: 1px solid white;
+            border-radius: 3px;
+        }
+
+        .blue{
+            background: rgb(12, 12, 107);
+        }
+        .purple{
+            background: purple;
+        }
+        .cornflowerblue{
+            background: cornflowerblue;
+        }
+        .green{
+            background: rgb(33, 175, 33);
+        }
+        .orange{
+            background: rgb(255, 102, 0);
+        }
+        .allcaps{
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <center>    
+    <h3>Simple Bank (Blockchain driven)</h3>
+        <div style="display: flex; margin-left: 150px; ">
+            <div  style="border: 1px; width: 300px;" >
+                <div> 
+                    <p class="allcaps">Account Information</p> 
+                    <button class="purple botton" id="getbalance"> 
+                        Get Balance
+                    </button>
+                        <p id="balance">
+                        <!-- Balance : $ 100 -->
+                        </p>
+                    <br>
+                    <button class="cornflowerblue botton" id="getuserinfo">
+                        Get User Information
+                    </button>
+                        <p id="accinfo">
+                            <!-- Name :   David Jones <br>
+                            Email : jones@igi.com <br>
+                            Balance : 100 <br> -->
+                        </p>
+                        <br>
+                </div>
+            </div>
+            <div  style="border: 1px ; width: 300px;" >
+                <div> 
+                    <p class="allcaps">Banking Transactions</p>
+                    Enter Amount : 
+                    <input type="text" id="transactionAmount" />
+                    <p id="transactionDetails"></p>
+                    <div style="display: flex; margin-top: 10px; margin-left: 80px; ">
+                        <div>
+                            <button class="green botton" id="withdraw">
+                                Withdraw
+                            </button>
+                        </div>
+                        <div style="margin-left: 10px;">
+                            <button class="orange botton" id="deposit">
+                                Deposit
+                            </button>
+                        </div>
+                    </div>
+                    <br>
+                    <p class="allcaps">Money Transfer</p> 
+                    Enter Amount :
+                    <input type="text" id="moneyTamount"/>
+                    <br><br>
+                    Recipient Email :
+                    <input type="text" id="moneyTemail"/>
+                    <p id="transferDetails"></p>
+                    <div>
+                        <button class="purple botton"  id="sendmoney">
+                            Send Money
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div  style="border: 1px ; width: 300px;">
+                <div> 
+                    <p class="allcaps">Register</p>
+                    Name :
+                    <input id="regname" type="text"/>
+                    <br><br>
+                    Email :
+                    <input id="regemail" type="text"/>
+                    <br>
+                    <p id="regDetails"></p>
+                    <div>
+                        <button id="regsubmit" class="blue botton">
+                            Submit
+                        </button>
+                    </div>
+                    <br>
+                    Name :
+                    <input type="text" id="newName"/>
+                    <br>
+                    <p id="resetNameDetails"> </p>
+                    <div>
+                        <button id="resetName" class="blue botton">
+                            Reset Name
+                        </button>
+                    </div>
+                    <br>
+                    Email :
+                    <input type="text" id="newEmail"/>
+                    <br>
+                    <p id="resetEmailDetails"> </p>
+                    <div>
+                        <button id="resetEmail" class="blue botton">
+                            Reset Email
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <br>
+            
+        </div>
+        <div>
+            <h3>Transaction details (Blockchain)</h3>
+            <button id="ifreload"  class="cornflowerblue botton">Refresh table</button>
+            <br>
+            <br>
+            <iframe id="iframeid" src="https://rinkeby.etherscan.io/address/0xbe836e4f91733531d83229fd9d225d8a68bf26e7" style="height:1000px;width:1200px;border:none;" scrolling="yes" title="Iframe Example"></iframe>
+        </div>
+    </center>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.3.4/web3.min.js" integrity="sha512-TTGImODeszogiro9DUvleC9NJVnxO6M0+69nbM3YE9SYcVe4wZp2XYpELtcikuFZO9vjXNPyeoHAhS5DHzX1ZQ==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous"></script>
+    <script>
+    
+        var contract;
+        $(document).ready(function(){
+            var address = "0xBe836E4f91733531D83229FD9d225d8A68bf26E7"
+            var abi = [
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "checkDeposit",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "email",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "checkInfo",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "emailFrom",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "emailTo",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "checkTransfer",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "checkWithdraw",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "checkbalance",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "email",
+				"type": "string"
+			}
+		],
+		"name": "createAccount",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "amt",
+				"type": "uint256"
+			}
+		],
+		"name": "deposit",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getAccountInfo",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getBalance",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getEmail",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getName",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "amt",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "toEmail",
+				"type": "string"
+			}
+		],
+		"name": "moneytransfer",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "email",
+				"type": "string"
+			}
+		],
+		"name": "resetEmail",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			}
+		],
+		"name": "resetName",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "amt",
+				"type": "uint256"
+			}
+		],
+		"name": "withdraw",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	}
+]
+
+            web3 = new Web3(Web3.givenProvider);
+            contract = new web3.eth.Contract(abi, address);
+
+        })  
+
+        $('#getbalance').click(function(){
+            console.log("get balance called");
+
+            web3.eth.getAccounts().then(function(accounts){
+                var acc = accounts[0];
+                return contract.methods.getBalance().send({
+                        from: acc,
+                })
+            })
+            .then(function(tx){
+                
+                var amount = tx.events.checkbalance.returnValues[0];
+                $('#balance').html("Balance : $ "+amount+" ");
+                var info = tx.events.checkInfo.returnValues;
+                $('#accinfo').html(
+                    " Name : "+info[0]+" <br> "+
+                    " Email : "+info[1]+" <br> "+
+                    " Balance : $ "+info[2]+" <br> "
+                );  
+                console.log('success', tx);
+
+            })
+            .catch(function(tx){
+                $('#balance').html("Balance : Query failed ");
+                console.log('error', tx);
+            })
+
+        })
+        
+        $('#getuserinfo').click(function(){
+            console.log("getting the user information ..");
+
+            web3.eth.getAccounts().then(function(accounts){
+                var acc = accounts[0];
+                return contract.methods.getAccountInfo().send({
+                        from: acc,
+                })
+            })
+            .then(function(tx){
+                var info = tx.events.checkInfo.returnValues;
+                
+                $('#accinfo').html(
+                    " Name : "+info[0]+" <br> "+
+                    " Email : "+info[1]+" <br> "+
+                    " Balance : $ "+info[2]+" <br> "
+                );                
+
+                console.log('success', tx);
+
+            })
+            .catch(function(tx){
+
+                $('#accinfo').html(
+                    " Name : -- <br> "+
+                    " Email : -- <br> "+
+                    " Balance : -- <br> "+
+                    " Query failed <br>"
+                );
+                console.log('error', tx);
+            })
+        
+        })
+
+        $('#withdraw').click(function(){
+
+            web3.eth.getAccounts().then(function(accounts){
+                var acc = accounts[0];
+                var amt = parseInt($('#transactionAmount').val());
+                console.log("withdrawing ..",amt);
+                return contract.methods.withdraw(amt).send({
+                        from: acc,
+                })
+            })
+            .then(function(tx){
+                var amount = tx.events.checkWithdraw.returnValues[0];
+                
+                $('#balance').html("Balance : $ "+amount+" ");
+
+                $('#transactionDetails').html(
+                    " Withdraw successful "
+                );
+                
+                var info = tx.events.checkInfo.returnValues;
+                
+                $('#accinfo').html(
+                    " Name : "+info[0]+" <br> "+
+                    " Email : "+info[1]+" <br> "+
+                    " Balance : $ "+info[2]+" <br> "
+                );  
+                
+                console.log('success', tx);
+
+            })
+            .catch(function(tx){
+
+                $('#transactionDetails').html(
+                    " Withdraw : failed "
+                );
+                console.log('error', tx);
+            })
+        })
+
+        $('#deposit').click(function(){
+            console.log("depositing ..");
+            web3.eth.getAccounts().then(function(accounts){
+                var acc = accounts[0];
+                var amt = parseInt($('#transactionAmount').val());
+                console.log("depositing ..",amt);
+                return contract.methods.deposit(amt).send({
+                        from: acc,
+                })
+            })
+            .then(function(tx){
+                console.log('success', tx);
+                var amount = tx.events.checkDeposit.returnValues[0];
+                $('#balance').html("Balance : $ "+amount+" ");
+
+                $('#transactionDetails').html(
+                    " Deposit : successful "
+                ); 
+                var info = tx.events.checkInfo.returnValues;
+                
+                $('#accinfo').html(
+                    " Name : "+info[0]+" <br> "+
+                    " Email : "+info[1]+" <br> "+
+                    " Balance : $ "+info[2]+" <br> "
+                );               
+                
+            })
+            .catch(function(tx){
+                console.log('error', tx);
+                $('#transactionDetails').html(
+                    " Deposit : failed ");
+                
+            })
+
+        })
+
+        $('#sendmoney').click(function(){
+            console.log("sending the money ..");
+
+            web3.eth.getAccounts().then(function(accounts){
+                var acc = accounts[0];
+                var amt = parseInt($('#moneyTamount').val());
+                var email = $('#moneyTemail').val();
+                return contract.methods.moneytransfer(amt, email).send({
+                        from: acc,
+                })
+            })
+            .then(function(tx){
+                var info = tx.events.checkInfo.returnValues;
+                
+                $('#accinfo').html(
+                    " Name : "+info[0]+" <br> "+
+                    " Email : "+info[1]+" <br> "+
+                    " Balance : $ "+info[2]+" <br> "
+                ); 
+                
+                $('#transferDetails').html(
+                    " money successfully transferred "
+                );
+
+                console.log('success', tx);
+
+            })
+            .catch(function(tx){
+
+                $('#transferDetails').html(
+                    " failed to transfer "
+                );
+
+
+                $('#accinfo').html(
+                    " Name : -- <br> "+
+                    " Email : -- <br> "+
+                    " Balance : -- <br> "+
+                    " Query failed <br>"
+                );
+                console.log('error', tx);
+            })
+        })
+
+        $('#regsubmit').click(function(){
+            console.log("register the user info ..");
+
+            web3.eth.getAccounts().then(function(accounts){
+                var acc = accounts[0];
+                var name = $('#regname').val();
+                var email = $('#regemail').val();
+                return contract.methods.createAccount(name, email).send({
+                        from: acc,
+                })
+            })
+            .then(function(tx){
+                var info = tx.events.checkInfo.returnValues;
+                
+                $('#accinfo').html(
+                    " Name : "+info[0]+" <br> "+
+                    " Email : "+info[1]+" <br> "+
+                    " Balance : $ "+info[2]+" <br> "
+                ); 
+                
+                $('#regDetails').html(
+                    " Successfully registered "
+                );
+
+                console.log('success', tx);
+
+            })
+            .catch(function(tx){
+
+                $('#regDetails').html(
+                    " failed to register "
+                );
+
+
+                $('#accinfo').html(
+                    " Name : -- <br> "+
+                    " Email : -- <br> "+
+                    " Balance : -- <br> "+
+                    " Query failed <br>"
+                );
+                console.log('error', tx);
+            })
+        })
+
+        $('#resetName').click(function(){
+
+            console.log("resetting the name ..");
+
+            web3.eth.getAccounts().then(function(accounts){
+                var acc = accounts[0];
+                var newName = $('#newName').val();
+                return contract.methods.resetName(newName).send({
+                        from: acc,
+                })
+            })
+            .then(function(tx){
+                var info = tx.events.checkInfo.returnValues;
+                
+                $('#accinfo').html(
+                    " Name : "+info[0]+" <br> "+
+                    " Email : "+info[1]+" <br> "+
+                    " Balance : $ "+info[2]+" <br> "
+                ); 
+                
+                $('#resetNameDetails').html(
+                    " Name Reset : successful "
+                );
+
+                console.log('success', tx);
+
+            })
+            .catch(function(tx){
+
+                $('#resetNameDetails').html(
+                    " Name Reset : failed "
+                );
+
+                $('#accinfo').html(
+                    " Name : -- <br> "+
+                    " Email : -- <br> "+
+                    " Balance : -- <br> "+
+                    " Query failed <br>"
+                );
+                console.log('error', tx);
+            })
+
+        })
+
+        $('#resetEmail').click(function(){
+            console.log("resetting the email ..");
+            web3.eth.getAccounts().then(function(accounts){
+                var acc = accounts[0];
+                var newEmail = $('#newEmail').val();
+                return contract.methods.resetEmail(newEmail).send({
+                        from: acc,
+                })
+            })
+            .then(function(tx){
+                var info = tx.events.checkInfo.returnValues;
+
+                $('#resetEmailDetails').html(
+                    " Email Reset : successful "
+                );
+                
+                $('#accinfo').html(
+                    " Name : "+info[0]+" <br> "+
+                    " Email : "+info[1]+" <br> "+
+                    " Balance : $ "+info[2]+" <br> "
+                );                
+
+                console.log('success', tx);
+
+            })
+            .catch(function(tx){
+
+                $('#resetEmailDetails').html(
+                    " Email Reset : failed "
+                );
+
+                $('#accinfo').html(
+                    " Name : -- <br> "+
+                    " Email : -- <br> "+
+                    " Balance : -- <br> "+
+                    " Query failed <br>"
+                );
+                console.log('error', tx);
+            })
+
+        })
+
+        $('#ifreload').click(function(){
+            document.getElementById('iframeid').src = document.getElementById('iframeid').src
+
+        })
+     
+    </script>
+</body>
+</html>

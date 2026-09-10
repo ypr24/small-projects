@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  app:
+    build: ./my-express-app
+    container_name: my_express_app
+    # environment:
+      # HTTP_PROXY: http://192.168.49.1:8282
+      # HTTPS_PROXY: http://192.168.49.1:8282
+    ports:
+      - "3001:3000"
+  fastapi:
+    build: ./my-fastapi-app
+    container_name: my_fastapi_app
+    # environment:
+      # HTTP_PROXY: http://192.168.49.1:8282
+      # HTTPS_PROXY: http://192.168.49.1:8282
+    ports:
+      - "3002:8000"
+  nginx:
+    build: ./nginx
+    container_name: my_nginx
+    # environment:
+      # HTTP_PROXY: http://192.168.49.1:8282
+      # HTTPS_PROXY: http://192.168.49.1:8282
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+      - fastapi
+networks:
+  default:
+    name: my_network

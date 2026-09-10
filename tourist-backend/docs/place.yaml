@@ -1,0 +1,89 @@
+paths:
+  /place/insert:
+    post:
+      tags:
+        - Place
+      summary: Add a new tourist place (CREATE)
+      requestBody:
+        required: true
+        content:
+          application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    example: Red Fort
+                  address:
+                    type: string
+                    example: Netaji Subhash Marg, Lal Qila, Chandni Chowk, New Delhi, Delhi 110006
+                  description:
+                    type: string
+                    example: This is the description of Red Fort
+                  image:
+                    type: string
+                    example: http://abhibuscommunity.com/wp-content/uploads/2018/01/delhi-red-fort.jpg 
+      responses:
+          '200':
+            description: A successful response
+          default:
+            description: error !!
+  /place/getallplaces:
+    get:
+      tags:
+        - Place
+      summary: Get the list of all places (READ)
+      responses:
+          '200':
+            description: A successful response
+          default:
+            description: error !!
+  /place/update:
+    put:
+      tags:
+        - Place
+      summary: Update new tourist place (UPDATE)
+      requestBody:
+        required: true
+        content:
+          application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    example: Red Fort
+                  address:
+                    type: string
+                    example: Netaji Subhash Marg, Lal Qila, Chandni Chowk, New Delhi, Delhi 110006
+                  description:
+                    type: string
+                    example: This is the description of Red Fort
+                  image:
+                    type: string
+                    example: http://abhibuscommunity.com/wp-content/uploads/2018/01/delhi-red-fort.jpg 
+      responses:
+          '200':
+            description: A successful response
+          default:
+            description: error !!
+  /place/delete:  
+    delete:
+      tags:
+        - Place
+      summary: Deletes a place (DELETE)
+      requestBody:
+        required: true
+        content:
+          application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    example: Red Fort
+      responses:
+          '200':
+            description: A successful response
+          default:
+            description: error !!

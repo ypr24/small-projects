@@ -1,0 +1,96 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "description": " (Content Filter - Cosine similarity)",
+      "version": "1.0.0",
+      "title": "Movie Recommendation System",
+      "license": {
+        "name": "MIT",
+        "url": "https://opensource.org/licenses/MIT"
+      }
+    },
+    "servers": [
+      {
+        "url": "/"
+      }
+    ],
+    "tags": [
+      {
+        "name": "Movies",
+        "description": "API for requesting and return movies requests"
+      }
+    ],
+    "paths": {
+      "/movies/recommend?name={name}&n={n}": {
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "description": "movie name",
+            "type": "string",
+            "default":"Avatar"
+          },
+          {
+            "name": "n",
+            "in": "path",
+            "required": true,
+            "description": "top n recommended movies",
+            "type": "string",
+            "default":"5"
+          }
+        ],
+        "get": {
+          "tags": [
+            "Movies"
+          ],
+          "summary": "Returns recommended movies list similar to given movie title {name}",
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/movies/search?startwith={startwith}&n={n}": {
+        "parameters": [
+          {
+            "name": "startwith",
+            "in": "path",
+            "required": true,
+            "description": " search the titles of the movies startwith ",
+            "type": "string",
+            "default":"A"
+          },
+          {
+            "name": "n",
+            "in": "path",
+            "required": true,
+            "description": "top n search results which starts with {startwith}",
+            "type": "string",
+            "default":"5"
+          }
+        ],
+        "get": {
+          "tags": [
+            "Movies"
+          ],
+          "summary": "Get the list of movies which startwith title {startwith}",
+          "responses": {
+            "200": {
+              "description": "OK"
+            },
+            "400": {
+              "description": "Failed. Misunderstood Request."
+            },
+            "404": {
+              "description": "Failed. Book request not found."
+            }
+          }
+        }
+      }
+    }
+    
+  }
+
+  
