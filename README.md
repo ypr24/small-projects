@@ -5,7 +5,7 @@ JavaScript:
 1. Tourist Frontend : React JS 
 2. Tourist Backend : Express JS 
 3. GraphQLBookApp : Basic ReactJS Express JS app with GraphQL
-4. ReactNativePMIndiaListApp : ReactNative app which list PM of India
+4. ReactNativePMIndiaListApp : ReactNative app 
 
 Solidity : 
 
