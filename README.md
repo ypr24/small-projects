@@ -8,6 +8,7 @@ JavaScript:
 4. ReactNativePMIndiaListApp : ReactNative app which list PM of India
 
 Solidity : 
+
 5. Simple Bank Blockchain
 
 Python:
@@ -20,16 +21,20 @@ Python:
 11. ai-agents
 
 Android
+
 12. QuoteAppMVVM
 
 PHP 
+
 13. PHP-assignment
    
 Go & Rust
+
 14. Go-concurrency
 15. Rust-Folder-Copy
 
 Deploy
+
 16. deploy with docker compose
 17. deploy with Kubernetes
 
