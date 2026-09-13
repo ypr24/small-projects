@@ -4,6 +4,8 @@ const books = require('../models/books')
 
 const authorResolver = {
     BookType: {
+        authorId: (book) => book.authorId,
+        authorid: (book) => book.authorId,
         author: (book) => {
             return authors.find(author => author.id === book.authorId)
         },

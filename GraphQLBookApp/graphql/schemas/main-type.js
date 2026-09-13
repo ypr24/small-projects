@@ -2,7 +2,8 @@ const schema = `
     type BookType {
         id: ID!
         name: String!
-        authorid: String
+        authorId: ID
+        authorid: ID
         author: AuthorType
     }
     type AuthorType {

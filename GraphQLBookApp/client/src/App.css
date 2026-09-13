@@ -1,38 +1,389 @@
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
+.app-shell {
   min-height: 100vh;
+  background: linear-gradient(135deg, #f5f1ea 0%, #f7f8f4 48%, #e4efeb 100%);
+}
+
+.app-header,
+.app-content {
+  width: min(1120px, calc(100% - 48px));
+  margin: 0 auto;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 54px 0 42px;
+}
+
+.brand-mark,
+.section-icon,
+.empty-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  background: #d85d3f;
+  color: #fffaf3;
+  font-weight: 800;
+}
+
+.brand-mark {
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  font-size: 18px;
+  letter-spacing: 1px;
+  box-shadow: 0 10px 22px rgba(148, 62, 43, 0.2);
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  color: #76817d;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.7px;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 6px;
+  color: #17252a;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(30px, 4vw, 46px);
+  font-weight: 500;
+  letter-spacing: -0.5px;
+}
+
+.header-copy {
+  margin-bottom: 0;
+  color: #65716e;
+  font-size: 15px;
+}
+
+.app-content {
+  display: grid;
+  gap: 22px;
+  padding-bottom: 64px;
+}
+
+.panel {
+  border: 1px solid rgba(46, 71, 70, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 253, 249, 0.8);
+  box-shadow: 0 16px 38px rgba(35, 52, 50, 0.07);
+}
+
+.add-book-panel {
+  padding: 28px 32px 32px;
+}
+
+.section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.section-heading h2 {
+  margin-bottom: 0;
+  color: #203238;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 26px;
+  font-weight: 500;
+}
+
+.section-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  font-size: 22px;
+  font-weight: 400;
+}
+
+.section-description {
+  max-width: 500px;
+  margin: 12px 0 24px;
+  color: #6c7774;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.book-form {
+  display: grid;
+  grid-template-columns: minmax(190px, 1.5fr) minmax(180px, 1fr) auto;
+  align-items: end;
+  gap: 10px 14px;
+}
+
+.book-form label {
+  grid-row: 1;
+  color: #55625f;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.book-form label:nth-of-type(2) {
+  grid-column: 2;
+}
+
+.book-form input,
+.book-form select {
+  min-width: 0;
+  height: 46px;
+  border: 1px solid #d7ded9;
+  border-radius: 8px;
+  outline: none;
+  background: #fffefa;
+  color: #253438;
+  padding: 0 13px;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.book-form input:focus,
+.book-form select:focus {
+  border-color: #3f8a7c;
+  box-shadow: 0 0 0 3px rgba(63, 138, 124, 0.14);
+}
+
+.book-form input {
+  grid-column: 1;
+}
+
+.book-form select {
+  grid-column: 2;
+}
+
+.primary-button {
+  height: 46px;
+  border: 0;
+  border-radius: 8px;
+  background: #286f67;
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 0 20px;
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.primary-button:hover {
+  background: #205c55;
+  transform: translateY(-1px);
+}
+
+.library-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.82fr) minmax(0, 1.6fr);
+  gap: 22px;
+}
+
+.book-list-panel,
+.details-panel {
+  min-height: 390px;
+  padding: 28px 30px;
+}
+
+.compact-heading {
+  align-items: center;
+  margin-bottom: 22px;
+}
+
+.collection-label,
+.book-id {
+  border-radius: 999px;
+  background: #e3efeb;
+  color: #35746b;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  padding: 7px 10px;
+  text-transform: uppercase;
+}
+
+.book-list,
+.related-books ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.book-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-height: 52px;
+  border-bottom: 1px solid #e7ebe7;
+  color: #44524f;
+  cursor: pointer;
+  font-size: 14px;
+  transition: color 160ms ease, padding 160ms ease;
+}
+
+.book-item:hover,
+.book-item.selected {
+  color: #1c6e65;
+  padding-left: 5px;
+}
+
+.book-item.selected {
+  font-weight: 800;
+}
+
+.book-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #cbd8d2;
+}
+
+.selected .book-dot {
+  background: #d85d3f;
+  box-shadow: 0 0 0 4px rgba(216, 93, 63, 0.12);
+}
+
+.book-arrow {
+  margin-left: auto;
+  color: #a1afaa;
+  font-size: 17px;
+}
+
+.state-message {
+  color: #7b8783;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.details-panel {
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.book-details .section-heading h2 {
+  max-width: 460px;
+  font-size: 32px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+.book-id {
+  background: #f4e5dc;
+  color: #a74e36;
+}
+
+.author-block {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  border-top: 1px solid #e7ebe7;
+  border-bottom: 1px solid #e7ebe7;
+  margin-bottom: 28px;
+  padding: 17px 0;
+}
+
+.author-label {
+  color: #83908b;
+  font-size: 12px;
+}
+
+.author-block strong {
+  color: #2b4747;
+  font-size: 15px;
+}
+
+.related-books h3 {
+  margin-bottom: 10px;
+  color: #66736f;
+  font-size: 12px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.related-books li {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #e7ebe7;
+  color: #3f4f4c;
+  font-size: 14px;
+  padding: 11px 0;
+}
+
+.related-id {
+  color: #a0aca8;
+  font-size: 12px;
+}
+
+.empty-details {
+  max-width: 300px;
+  color: #7b8783;
+}
+
+.empty-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  margin-bottom: 18px;
+  font-size: 24px;
+  font-weight: 400;
+}
+
+.empty-details h2 {
+  margin-bottom: 8px;
+  color: #314448;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 26px;
+  font-weight: 500;
+}
+
+.empty-details p {
+  margin-bottom: 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+@media (max-width: 760px) {
+  .app-header,
+  .app-content {
+    width: min(100% - 30px, 600px);
   }
-  to {
-    transform: rotate(360deg);
+
+  .app-header {
+    padding: 32px 0 28px;
+  }
+
+  .add-book-panel,
+  .book-list-panel,
+  .details-panel {
+    padding: 22px 20px;
+  }
+
+  .book-form,
+  .library-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .book-form label,
+  .book-form label:nth-of-type(2),
+  .book-form input,
+  .book-form select {
+    grid-column: 1;
+  }
+
+  .book-form label:nth-of-type(2) {
+    grid-row: auto;
+  }
+
+  .primary-button {
+    width: 100%;
+  }
+
+  .book-list-panel,
+  .details-panel {
+    min-height: auto;
   }
 }

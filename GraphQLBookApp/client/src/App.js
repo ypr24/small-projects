@@ -12,20 +12,23 @@ const client = new ApolloClient({
 
 function App() {
   return (
-    <div>
-      <ApolloProvider client={client}>
-      <div> 
-        <div style={{ paddingTop:50, paddingLeft:50, }}>
+    <ApolloProvider client={client}>
+      <div className="app-shell">
+        <header className="app-header">
+          <div className="brand-mark" aria-hidden="true">GB</div>
+          <div>
+            <p className="eyebrow">Personal library</p>
+            <h1>GraphQL Book App</h1>
+            <p className="header-copy">Keep track of the stories worth returning to.</p>
+          </div>
+        </header>
+
+        <main className="app-content">
           <AddBook />
-        </div>
-        <br />
-        <div style={{ paddingTop:50, paddingLeft:50,}}>
           <BookList />
-          
-        </div>
+        </main>
       </div>
-      </ApolloProvider>
-    </div>
+    </ApolloProvider>
   );
 }
 

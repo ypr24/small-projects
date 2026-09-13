@@ -14,14 +14,24 @@ const BookList = (props) => {
     const displayBooks = () => {
 
         let data = props.data;
-        
+
         if(data.loading){
-            return( <div> Loading books .. </div> );
+            return( <p className="state-message">Loading your library...</p> );
+        } else if (!data.books || data.books.length === 0) {
+            return( <p className="state-message">No books yet. Add your first title above.</p> );
         } else {
             return data.books.map(book => {
                 const {id, name} = book
                 return(
-                    <li key={ id } onClick={ (e) => {onSelected(id)} } >  { name }  </li> 
+                    <li
+                        className={selected === id ? 'book-item selected' : 'book-item'}
+                        key={id}
+                        onClick={() => onSelected(id)}
+                    >
+                        <span className="book-dot" aria-hidden="true" />
+                        <span>{name}</span>
+                        <span className="book-arrow" aria-hidden="true">&#8594;</span>
+                    </li>
                 );
             })
         }
@@ -30,23 +40,23 @@ const BookList = (props) => {
     
 
     return (
-        <div>
-            <br />
-            <div style={{display:'flex'}}>
-                <div style ={{width:400}}>
-                    BookList
-                    <br />
-                    <ul id="book-list">
+        <section className="library-layout">
+                <div className="panel book-list-panel">
+                    <div className="section-heading compact-heading">
+                        <div>
+                            <p className="eyebrow">Your collection</p>
+                            <h2>Books</h2>
+                        </div>
+                        <span className="collection-label">Live list</span>
+                    </div>
+                    <ul id="book-list" className="book-list">
                         {displayBooks()}
                     </ul>
                 </div>
-                <div style ={{width:600}}>
+                <div className="panel details-panel">
                     <BookDetails bookId={selected}/>
                 </div>
-            </div>
-            
-            <br />
-        </div>
+        </section>
     )
 }
 

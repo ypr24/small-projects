@@ -20,8 +20,8 @@ app.get('/test',(req,res)=>{
 const mainRes = require('./graphql/schemas/main-resolver')
 const mainTypes = require('./graphql/schemas/main-type')
 
-registerTypes = mergeTypeDefs([mainTypes])
-registerResolvers = mergeResolvers([mainRes])
+const registerTypes = mergeTypeDefs([mainTypes])
+const registerResolvers = mergeResolvers([mainRes])
 
 
 app.use('/graphql', graphqlHTTP({
@@ -35,5 +35,5 @@ app.use('/graphql', graphqlHTTP({
 const PORT = process.env.PORT || 3005
 
 app.listen(PORT, ()=>{
-    console.log("Welcome to GraphQL tutorial");
+    console.log("Welcome to GraphQL tutorial http://localhost:3005/graphql");
 })
