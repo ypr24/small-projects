@@ -14,3 +14,54 @@ a {
 * {
   box-sizing: border-box;
 }
+
+body {
+  background: #f5f7fa;
+  color: #17202a;
+}
+
+.page-shell {
+  margin: 40px auto;
+  max-width: 1100px;
+  padding: 0 24px;
+}
+
+.navigation {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.success {
+  color: #19733a;
+}
+
+.error {
+  color: #b42318;
+}
+
+.place {
+  margin: 40px 0 60px;
+}
+
+.place-heading {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.place-image {
+  border-radius: 4px;
+  display: block;
+  height: 250px;
+  margin-top: 16px;
+  max-width: 100%;
+  object-fit: cover;
+  width: 420px;
+}

@@ -1,34 +1,105 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Tourist Frontend
 
-## Getting Started
+A small Next.js frontend for browsing and managing tourist places. The application uses the Pages Router, React, Material UI, and Axios. Place data is provided by a separate backend service.
 
-First, run the development server:
+## Requirements
+
+- Node.js 18.18 or later
+- npm
+- A running tourist API service on `http://localhost:3005`
+
+## Installation
+
+Install the frontend dependencies from the project root:
+
+```bash
+npm install
+```
+
+The API base URL is currently configured in [`config/config.js`](config/config.js):
+
+```js
+export const API_URL = 'http://localhost:3005/'
+```
+
+Change this value when the backend is running on another host or port.
+
+## Development
+
+Start the Next.js development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in a browser.
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+Available npm scripts:
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start the development server with hot reloading |
+| `npm run build` | Create a production build |
+| `npm run start` | Start the production server after a build |
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+## Application Routes
 
-## Learn More
+| Route | Purpose |
+| --- | --- |
+| `/` | Home page |
+| `/allplaces` | Fetch and display all places; supports deleting a place |
+| `/addplace` | Add or update a place |
+| `/api/hello` | Example Next.js API route included with the project |
 
-To learn more about Next.js, take a look at the following resources:
+The `/allplaces` and `/addplace` pages share the navigation rendered by `hoc/HeaderLayout.js`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Backend API Contract
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+The frontend calls the following endpoints relative to `API_URL`:
 
-## Deploy on Vercel
+| Method | Endpoint | Used for |
+| --- | --- | --- |
+| `GET` | `/place/getallplaces` | Load places |
+| `POST` | `/place/insert` | Add a place |
+| `PUT` | `/place/update` | Update a place |
+| `DELETE` | `/place/delete` | Delete a place by name |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The list endpoint should return an object containing a `list` array. Add and update requests send JSON with these fields:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+```json
+{
+	"name": "Example place",
+	"address": "Example address",
+	"description": "A short description",
+	"image": "https://example.com/image.jpg"
+}
+```
+
+The delete request sends `{ "name": "Example place" }` in the request body.
+
+## Project Structure
+
+```text
+components/
+	AddPlace/        Place form and create/update actions
+	AllPlaces/       Place list and delete behavior
+	Head/            Shared navigation
+config/            API configuration
+hoc/               Shared page layout
+pages/             Next.js pages and API routes
+public/            Static assets
+styles/            Global and page-specific styles
+```
+
+## Troubleshooting
+
+- If the place list is empty or requests fail, verify that the backend is running and that `API_URL` points to it.
+- If the browser reports a CORS error, configure the backend to allow requests from `http://localhost:3000`.
+- If dependencies are missing, remove `node_modules`, run `npm install`, and restart the development server.
+
+## Related Documentation
+
+- [Next.js documentation](https://nextjs.org/docs)
+- [React documentation](https://react.dev/)
+- [Material UI documentation](https://mui.com/material-ui/)
+- [Axios documentation](https://axios-http.com/docs/intro)

@@ -1,12 +1,12 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
-const PlaceController = require('../controller/place')
+const placeController = require('../controller/place');
 
-router.get('/getallplaces', PlaceController.getallplaces);
-router.put('/update',PlaceController.update);
-router.post('/insert', PlaceController.insert);
-router.delete('/delete', PlaceController.delete);
+router.get('/getallplaces', placeController.getAllPlaces);
+router.put('/update', placeController.update);
+router.post('/insert', placeController.insert);
+router.delete('/delete', placeController.delete);
 
 module.exports = router;
 

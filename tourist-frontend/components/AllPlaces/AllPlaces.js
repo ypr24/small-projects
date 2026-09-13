@@ -1,56 +1,51 @@
-import React, {useState, useEffect} from 'react'
+import React, { useState, useEffect } from 'react'
 import Place from './Place'
 import axios from 'axios'
-import config from '../../config/config'
+import { API_URL } from '../../config/config'
 
-const AllPlaces = (props) => {
-    
-    const [list, setList] = useState(props.allplaces)
-    const [del, setDel] = useState(false)
+const AllPlaces = ({ allplaces = [] }) => {
+    const [list, setList] = useState(allplaces)
+    const [error, setError] = useState('')
 
     const loadData = async () => {
 
-        const url = `${config.URL.SERVER}place/getallplaces`
+        const url = `${API_URL}place/getallplaces`
 
-        const getAllplaces = await axios.get(url)
-        .then(res=>{
-                const listOfallPlaces = res.data.list
-                return listOfallPlaces
-        })
-        .then((listOfallPlaces)=>{
-            setList(listOfallPlaces)
-        })
-        .catch(e=>e)
+        try {
+            const response = await axios.get(url)
+            setList(response.data.list || [])
+            setError('')
+        } catch (e) {
+            setError('Could not load places. Check the server and try again.')
+        }
 
     }
 
     useEffect(() => {
         loadData()
-    },[del])
+    }, [])
 
     const onDelete = async (name) => {
 
-        const url = `${config.URL.SERVER}place/delete`
+        const url = `${API_URL}place/delete`
 
-        const response = await axios.delete(
-            url, { data : {name: name} }
-            ).then(
-                res=>{
-                    setDel(!del)
-                    return res.data.r
-            }).catch(e=>e)
+        try {
+            await axios.delete(url, { data: { name } })
+            setList((currentList) => currentList.filter((place) => place.name !== name))
+        } catch (e) {
+            setError('Could not delete the place. Check the server and try again.')
+        }
 
     }
 
 
     return (
         <div>
-            <br/>
-            {
-                list.map( item => {
-                    return <Place onDelete={()=>{ onDelete(item.name) }} detail={item} />
-                })
-            }
+            {error && <p className="error">{error}</p>}
+            {list.length === 0 && !error && <p>No places found.</p>}
+            {list.map((item) => (
+                <Place key={item._id || item.name} onDelete={() => onDelete(item.name)} detail={item} />
+            ))}
         </div>
     )
 }

@@ -1,29 +1,26 @@
 import React from 'react'
-import Button from '@material-ui/core/Button'
+import Button from '@mui/material/Button'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 
-const Header = (props) => {
-
+const Header = ({ children }) => {
     const router = useRouter()
     const currentRoute = router.pathname
 
-    const selectedStyle = {background:'black', color:'white' }
-    const unselectedStyle = {background:'white', color:'black' }
+    const selectedStyle = { background: 'black', color: 'white' }
+    const unselectedStyle = { background: 'white', color: 'black' }
 
     return (
-        <div style={{margin:50}}>
-            <div style={{display:'flex'}}>
+        <div className="page-shell">
+            <nav className="navigation" aria-label="Primary navigation">
                 <Link href="/allplaces">
-                    <Button size="large" style={(currentRoute == "/allplaces")?selectedStyle:unselectedStyle} variant="contained"> All Places </Button>
+                    <Button size="large" style={currentRoute === '/allplaces' ? selectedStyle : unselectedStyle} variant="contained">All places</Button>
                 </Link>
-                <div style={{width:50}} ></div>
                 <Link href="/addplace">
-                    <Button size="large" style={(currentRoute == "/addplace")?selectedStyle:unselectedStyle} variant="contained" > Add Places </Button>
+                    <Button size="large" style={currentRoute === '/addplace' ? selectedStyle : unselectedStyle} variant="contained">Add place</Button>
                 </Link>
-            </div>
-            <br/>
-            {props.children}
+            </nav>
+            <main>{children}</main>
         </div>
     )
 }

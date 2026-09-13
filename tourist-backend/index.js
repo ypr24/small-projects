@@ -1,85 +1,53 @@
-const express = require('express')
-const morgan = require('morgan')
-const bodyParser = require('body-parser')
-const swaggerJsDoc = require("swagger-jsdoc");
-const swaggerUi = require("swagger-ui-express");
+const express = require('express');
+const morgan = require('morgan');
+const swaggerJsDoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
 const mongoose = require('mongoose');
-const cors = require('cors')
+const cors = require('cors');
 
-const app = express()
+const app = express();
 
 app.use(morgan('dev'));
-app.use(cors())
+app.use(cors());
+app.use(express.json());
 
-mongoose.Promise = global.Promise;
-mongoose.set('useCreateIndex', true);
+const mongoUrl = process.env.MONGODB_URI || 'mongodb://localhost/traveldb';
+const port = process.env.PORT || 3005;
 
-const url = process.env.MONGODB_URI || 'mongodb://localhost/traveldb'
+console.log('MongoDB URL:', mongoUrl);
 
-console.log('URL : ',url);
-
-mongoose.connect(
-    url, { useNewUrlParser: true,  useUnifiedTopology: true }
-).then(connect => console.log('connected to mongodb..'))
-.catch(e => console.log('could not connect to mongodb', e))
-
-
-// parse application/x-www-form-urlencoded
-app.use(bodyParser.json());
-// app.use(bodyParser.urlencoded({ extended: true }))
+mongoose.connect(mongoUrl)
+  .then(() => console.log('Connected to MongoDB.'))
+  .catch((error) => console.error('Could not connect to MongoDB:', error));
 
 const swaggerOptions = {
-    swaggerDefinition: {
-      openapi: '3.0.1', 
-      info: {
-        version: "1.0.0",
-        title: "API",
-        description: "API Information for tourist app",
-        contact: {
-          name: "Yash Pratap"
-        },
-        servers: ["http://localhost:3000"]
+  swaggerDefinition: {
+    openapi: '3.0.1',
+    info: {
+      version: '1.0.0',
+      title: 'Tourist API',
+      description: 'API information for the tourist app.',
+      contact: {
+        name: 'Yash Pratap',
       },
-      components: {
-        securitySchemes: {
-          bearerAuth: {
-            type: 'http',
-            scheme: 'bearer',
-            bearerFormat: 'jwt',
-          }
-        }
-      },
-      security: [{
-        bearerAuth: []
-      }]
     },
-    apis: [
-      "./docs/**/*.yaml",      
-    ]
+    servers: [{ url: `http://localhost:${port}` }],
+  },
+  apis: ['./docs/**/*.yaml'],
 };
-  
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-app.use('/place', require('./api/route/place'))
+app.use('/place', require('./api/route/place'));
 
-app.post('/test',(req, res)=>{
-
-  console.log('testing ...')
-  const {test, name} = req.body
-  console.log(`value of test = ${JSON.stringify(test, null, 2)}`)
-  console.log(`value of name = ${JSON.stringify(name, null, 2)}`)
-
+app.post('/test', (req, res) => {
   res.json({
-    r:{name:'qweqwe'}
-  })
+    r: { name: 'qweqwe' },
+  });
+});
 
-})
-
-const PORT = process.env.PORT || 3005 
-
-app.listen(PORT,()=>{
-  console.log('Welcome to tourist app')
-})
+app.listen(port, () => {
+  console.log(`Tourist API is running on port ${port}.`);
+});
 

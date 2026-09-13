@@ -1,91 +1,80 @@
 
-const Place = require('../models/place')
+const Place = require('../models/place');
 
 module.exports = {
-
-    getallplaces: async(req,res,next)=>{
-
-        const allPlaces = await Place.find({})
-        
-        res.json({
-            list : allPlaces,
-            message:'fetching the list of all places'
-        })
-
-    },
-    insert: async(req,res,next)=>{
-
-        const {name, address, description, image} = req.body;
-
-        const newPlace = new Place({ 
-            'name':name, 'address': address, 
-            'description' : description, 'image':image
-        })
-        
+    getAllPlaces: async (req, res) => {
         try {
-            const response = await newPlace.save()
+            const places = await Place.find({});
+            res.json({ list: places, message: 'Fetching the list of all places.' });
+        } catch (error) {
+            res.status(500).json({ message: 'Failed to fetch places.', error: error.message });
+        }
+    },
 
-            res.json({
-                response: response ,
-                message:'place successfully inserted'
-            })
+    insert: async (req, res) => {
+        const { name, address, description, image } = req.body;
 
-        }catch(e){
-
-            res.json({
-                response: e ,
-                message:'place insertion failed'
-            })
+        if (!name) {
+            return res.status(400).json({ message: 'Name is required.' });
         }
 
-    },
-    update: async(req,res,next)=>{
-
-        const {name, address, description, image} = req.body;
-
-        let updatedPlaceDetails = {}
-
-        Boolean(name) && (updatedPlaceDetails['name'] = name)
-        Boolean(address) && (updatedPlaceDetails['address'] =  address)
-        Boolean(description) && (updatedPlaceDetails['description'] = description)
-        Boolean(image) && (updatedPlaceDetails['image'] = image)
-
         try {
-            const response = await Place.updateOne({ 'name': name }, { $set: updatedPlaceDetails })
+            const place = await Place.create({ name, address, description, image });
+            res.status(201).json({ response: place, message: 'Place successfully inserted.' });
+        } catch (error) {
+            const status = error.code === 11000 ? 409 : 500;
+            res.status(status).json({ message: 'Place insertion failed.', error: error.message });
+        }
+    },
 
-            res.json({
-                response: response ,
-                message:'place successfully updated'
-            })
+    update: async (req, res) => {
+        const { name, newName, address, description, image } = req.body;
 
-        }catch(e){
-
-            res.json({
-                response: e ,
-                message:'place update failed'
-            })
+        if (!name) {
+            return res.status(400).json({ message: 'Name is required.' });
         }
 
-    },
-    delete: async(req,res,next)=>{
+        const updates = {};
+        if (newName) updates.name = newName;
+        if (address !== undefined) updates.address = address;
+        if (description !== undefined) updates.description = description;
+        if (image !== undefined) updates.image = image;
 
-        console.log('Deleting ...')
-        const {name} = req.body;
-        console.log('name: ',name)
-        try {
-            const response = await Place.deleteOne({ name: name })
-            console.log(JSON.stringify(response, null, 2))
-            res.json({
-                response: response ,
-                message:'place successfully deleted'
-            })
-        }catch(e){
-            console.log(e)
-            res.json({
-                response: e ,
-                message:'place deletion failed'
-            })
+        if (Object.keys(updates).length === 0) {
+            return res.status(400).json({ message: 'At least one field to update is required.' });
         }
 
-    },   
-}
+        try {
+            const result = await Place.updateOne({ name }, { $set: updates });
+
+            if (result.matchedCount === 0) {
+                return res.status(404).json({ message: 'Place not found.' });
+            }
+
+            res.json({ response: result, message: 'Place successfully updated.' });
+        } catch (error) {
+            const status = error.code === 11000 ? 409 : 500;
+            res.status(status).json({ message: 'Place update failed.', error: error.message });
+        }
+    },
+
+    delete: async (req, res) => {
+        const { name } = req.body;
+
+        if (!name) {
+            return res.status(400).json({ message: 'Name is required.' });
+        }
+
+        try {
+            const result = await Place.deleteOne({ name });
+
+            if (result.deletedCount === 0) {
+                return res.status(404).json({ message: 'Place not found.' });
+            }
+
+            res.json({ response: result, message: 'Place successfully deleted.' });
+        } catch (error) {
+            res.status(500).json({ message: 'Place deletion failed.', error: error.message });
+        }
+    },
+};

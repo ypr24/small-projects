@@ -1,96 +1,56 @@
-import React, {useState} from 'react'
-import TextField from '@material-ui/core/TextField'
-import Grid from '@material-ui/core/Grid'
-import Button from '@material-ui/core/Button'
+import React, { useState } from 'react'
+import TextField from '@mui/material/TextField'
+import Button from '@mui/material/Button'
 import axios from 'axios'
-import config from '../../config/config'
+import { API_URL } from '../../config/config'
 
 const AddPlace = () => {
+    const [place, setPlace] = useState({ name: '', address: '', description: '', image: '' })
+    const [status, setStatus] = useState({ type: '', message: '' })
+    const [isSaving, setIsSaving] = useState(false)
 
-    const place = {
-        "name": "Red Fort",
-        "address": "Netaji Subhash Marg, Lal Qila, Chandni Chowk, New Delhi, Delhi 110006",
-        "description": "This is the description of Red Fort",
-        "image": "http://abhibuscommunity.com/wp-content/uploads/2018/01/delhi-red-fort.jpg"
+    const onChange = (event) => {
+        const { name, value } = event.target
+        setPlace((currentPlace) => ({ ...currentPlace, [name]: value }))
     }
 
-    const [name, setName] = useState(place.name)
-    const [address, setAddress] = useState(place.address)
-    const [description, setDescription] = useState(place.description)
-    const [image, setImage] = useState(place.image)
+    const savePlace = async (event, method, action) => {
+        event.preventDefault()
 
-    const onAddingPlace = async () => {
-
-        console.log('on adding place')
-       
-        const url = `${config.URL.SERVER}place/insert`
-
-        const addPlace = {
-            'name' : name, 'address' : address,
-            'description' : description, 'image' : image
+        if (Object.values(place).some((value) => !value.trim())) {
+            setStatus({ type: 'error', message: 'Please complete every field.' })
+            return
         }
 
-        console.log(`name : ${name}`)
+        setIsSaving(true)
+        setStatus({ type: '', message: '' })
 
-        console.log(JSON.stringify(addPlace, null, 2))
-
-        const response = await axios.post(url, addPlace).then(res=>{
-            return res.data.response
-        })
-
-        console.log('response', response)
-        
-    }
-
-    const onUpdatingPlace = async () => {
-
-        console.log('on updating place')
-
-        const url = `${config.URL.SERVER}place/update`
-
-        const updatePlace = {
-            name : name, address : address,
-            description : description, image : image
+        try {
+            await axios({
+                method,
+                url: `${API_URL}place/${action}`,
+                data: place,
+            })
+            setStatus({ type: 'success', message: `Place ${action === 'insert' ? 'added' : 'updated'} successfully.` })
+        } catch (error) {
+            setStatus({ type: 'error', message: 'Could not save the place. Check the server and try again.' })
+        } finally {
+            setIsSaving(false)
         }
-
-        console.log(`name : ${name}`)
-
-        console.log(JSON.stringify(updatePlace, null, 2))
-
-        const response = await axios.put(url, updatePlace).then(res=>{
-            return res.data.response
-        })
-
-        console.log('response', response)
-    
-    
     }
 
     return (
-        <div>
-           <Grid>
-            <form action="">
-                <div style={{margin:20}}>
-                <TextField variant="outlined" label="Place Name" value={name} onChange={(e) => setName(e.target.value)} />
-                </div>
-                <div style={{margin:20}}>
-                <TextField style={{paddingRight:100}} variant="outlined" value={address} fullWidth label="Place Address" onChange={(e) => setAddress(e.target.value)} />
-                </div>
-                <div style={{margin:20, }}>
-                <TextField style={{paddingRight:100, }} fullWidth variant="outlined" value={image} label="Place image url" onChange={(e) => setImage(e.target.value)} />
-                </div>
-                <div style={{margin:20}}> 
-                <TextField style={{paddingRight:100}} multiline fullWidth rows={6} value={description} variant="outlined" label="Place Description" onChange={(e) => setDescription(e.target.value)} />
-                </div>
-                <div style={{display:'flex',marginLeft:20}}>
-                    <Button variant='contained' onClick={()=>{onAddingPlace()}} style={{background:'green', color:'white'}}> Add Place </Button>
-                    <div style={{marginRight:50}}></div>
-                    <Button variant='contained' onClick={()=>{onUpdatingPlace()}} style={{background:'darkorange', color:'white'}}> Update Place </Button>
-                </div>
-                
-            </form>
-            </Grid>
-        </div>
+        <form onSubmit={(event) => savePlace(event, 'post', 'insert')}>
+            <TextField name="name" label="Place name" value={place.name} onChange={onChange} fullWidth required margin="normal" />
+            <TextField name="address" label="Place address" value={place.address} onChange={onChange} fullWidth required margin="normal" />
+            <TextField name="image" label="Image URL" value={place.image} onChange={onChange} fullWidth required margin="normal" />
+            <TextField name="description" label="Description" value={place.description} onChange={onChange} fullWidth required multiline rows={5} margin="normal" />
+            <div className="form-actions">
+                <Button type="submit" variant="contained" disabled={isSaving}>Add place</Button>
+                <Button type="button" variant="outlined" disabled={isSaving} onClick={(event) => savePlace(event, 'put', 'update')}>Update place</Button>
+            </div>
+            {status.message && <p className={status.type}>{status.message}</p>}
+        </form>
     )
 }
 

@@ -2,7 +2,7 @@ import React from 'react'
 import HeaderLayout from '../hoc/HeaderLayout'
 import AllPlaces from '../components/AllPlaces/AllPlaces'
 import axios from 'axios'
-import config from '../config/config'
+import { API_URL } from '../config/config'
 
 const allplaces = (props) => {
     return (
@@ -16,7 +16,7 @@ const allplaces = (props) => {
 
 export async function getServerSideProps(ctx){
 
-    const url = `${config.URL.SERVER}place/getallplaces`
+    const url = `${API_URL}place/getallplaces`
     const getAllplaces = await axios.get(url).then(
         res=>{
             const listOfallPlaces = res.data.list

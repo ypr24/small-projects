@@ -1,21 +1,20 @@
 const mongoose = require('mongoose');
 
-const PlaceSchema = new mongoose.Schema({
+const placeSchema = new mongoose.Schema({
     name: {
         type: String,
         index: true,
-        unique:true,
-        dropDups: true
+        unique: true
     },
     address: String,
     image: String,
     description: String,
-    placeCreatedAt:{
+    placeCreatedAt: {
         type: Date,
-        default: Date.now()
-    }
-})
+        default: Date.now,
+    },
+});
 
-const Place = mongoose.model('place',PlaceSchema)
+const Place = mongoose.model('place', placeSchema);
 
 module.exports = Place;
