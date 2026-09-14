@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Bank dApp</title>
+
+    <style>
+        :root {
+            color: #1f2937;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            max-width: 760px;
+            margin: 70px auto;
+            padding: 0 20px;
+            text-align: center;
+            background: #f3f4f6;
+        }
+
+        main {
+            padding: 32px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            background: #ffffff;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .balance {
+            margin: 30px 0;
+            font-size: 42px;
+            font-weight: bold;
+            color: #166534;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 16px 0;
+        }
+
+        input {
+            width: 180px;
+            padding: 11px;
+            border: 1px solid #9ca3af;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 11px 18px;
+            border: 0;
+            border-radius: 4px;
+            background: #166534;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #14532d;
+        }
+
+        #account,
+        #status {
+            overflow-wrap: anywhere;
+        }
+
+        .muted {
+            color: #6b7280;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h1>Local Bank</h1>
+        <p class="muted">Deposit ETH into the bank contract or withdraw your deposited ETH.</p>
+
+        <button id="connect">Connect Wallet</button>
+        <p id="account" class="muted">Wallet not connected</p>
+
+        <div id="balance" class="balance">0 ETH</div>
+        <button id="refresh">Refresh Balance</button>
+
+        <div class="controls">
+            <input id="deposit-amount" type="number" min="0" step="any" placeholder="Deposit amount in ETH">
+            <button id="deposit">Deposit</button>
+        </div>
+
+        <div class="controls">
+            <input id="withdraw-amount" type="number" min="0" step="any" placeholder="Withdraw amount in ETH">
+            <button id="withdraw">Withdraw</button>
+        </div>
+
+        <p id="status" class="muted">Connect a wallet to begin.</p>
+    </main>
+
+    <script type="module">
+        import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6/+esm";
+
+        const RPC_URL = "http://127.0.0.1:8545";
+        const BANK_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+        const BANK_ABI = [
+            "function balances(address) view returns (uint256)",
+            "function deposit() payable",
+            "function withdraw(uint256 amount)"
+        ];
+
+        const provider = new ethers.JsonRpcProvider(RPC_URL);
+        const readOnlyBank = new ethers.Contract(BANK_ADDRESS, BANK_ABI, provider);
+        let connectedAddress = "";
+
+        function setStatus(message) {
+            document.getElementById("status").innerText = message;
+        }
+
+        function getAmount(inputId) {
+            const value = document.getElementById(inputId).value.trim();
+            if (!value || Number(value) <= 0) {
+                throw new Error("Enter an amount greater than zero.");
+            }
+            return ethers.parseEther(value);
+        }
+
+        async function refreshBalance() {
+            if (!connectedAddress) {
+                document.getElementById("balance").innerText = "0 ETH";
+                return;
+            }
+
+            try {
+                const balance = await readOnlyBank.balances(connectedAddress);
+                document.getElementById("balance").innerText = `${ethers.formatEther(balance)} ETH`;
+            } catch (error) {
+                console.error(error);
+                setStatus("Could not read the bank balance. Check BANK_ADDRESS and Anvil.");
+            }
+        }
+
+        async function connectWallet() {
+            try {
+                if (!window.ethereum) {
+                    alert("Please install MetaMask or another browser wallet.");
+                    return;
+                }
+
+                await window.ethereum.request({ method: "eth_requestAccounts" });
+                const browserProvider = new ethers.BrowserProvider(window.ethereum);
+                const signer = await browserProvider.getSigner();
+                connectedAddress = await signer.getAddress();
+
+                document.getElementById("account").innerText = `Connected: ${connectedAddress}`;
+                setStatus("Wallet connected.");
+                await refreshBalance();
+            } catch (error) {
+                console.error(error);
+                setStatus("Wallet connection failed.");
+            }
+        }
+
+        async function sendDeposit() {
+            try {
+                if (!connectedAddress) {
+                    throw new Error("Connect your wallet first.");
+                }
+
+                const amount = getAmount("deposit-amount");
+                const browserProvider = new ethers.BrowserProvider(window.ethereum);
+                const signer = await browserProvider.getSigner();
+                const bank = new ethers.Contract(BANK_ADDRESS, BANK_ABI, signer);
+
+                setStatus("Waiting for deposit approval...");
+                const transaction = await bank.deposit({ value: amount });
+                setStatus(`Deposit submitted: ${transaction.hash}`);
+                await transaction.wait();
+                setStatus("Deposit confirmed.");
+                await refreshBalance();
+            } catch (error) {
+                console.error(error);
+                setStatus(error.message || "Deposit failed.");
+            }
+        }
+
+        async function sendWithdrawal() {
+            try {
+                if (!connectedAddress) {
+                    throw new Error("Connect your wallet first.");
+                }
+
+                const amount = getAmount("withdraw-amount");
+                const browserProvider = new ethers.BrowserProvider(window.ethereum);
+                const signer = await browserProvider.getSigner();
+                const bank = new ethers.Contract(BANK_ADDRESS, BANK_ABI, signer);
+
+                setStatus("Waiting for withdrawal approval...");
+                const transaction = await bank.withdraw(amount);
+                setStatus(`Withdrawal submitted: ${transaction.hash}`);
+                await transaction.wait();
+                setStatus("Withdrawal confirmed.");
+                await refreshBalance();
+            } catch (error) {
+                console.error(error);
+                setStatus(error.message || "Withdrawal failed.");
+            }
+        }
+
+        document.getElementById("connect").onclick = connectWallet;
+        document.getElementById("refresh").onclick = refreshBalance;
+        document.getElementById("deposit").onclick = sendDeposit;
+        document.getElementById("withdraw").onclick = sendWithdrawal;
+    </script>
+</body>
+</html>
