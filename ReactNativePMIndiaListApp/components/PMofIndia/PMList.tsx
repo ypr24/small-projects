@@ -1,146 +1,144 @@
-import React,{useState} from 'react';
-import { SafeAreaView,Image, View, VirtualizedList, StyleSheet, Text, StatusBar } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { FlatList, Image, SafeAreaView, StatusBar, StyleSheet, Text, View } from 'react-native';
 
-const PMofIndiaInfoList = [
-    {
-        name:"Jawaharlal Nehru",
-        term:"15 August, 1947 - 15 April, 1952 15 April, 1952 - 17 April, 1957 17 April, 1957 - 2 April, 1962 2 April, 1962 - 27 May, 1964"
-        ,url:"https://images.oneindia.com/elections/prime-ministers/Jawaharlal-Nehru.jpg"
-    },
-    {
-        name:"Gulzarilal Nanda (acting)",
-        term:"27 May, 1964 - 9 June, 1964 11 January, 1966 - 24 January, 1966"
-        ,url:"https://images.oneindia.com/elections/prime-ministers/Gulzarilal-Nanda.jpg"
-    },
-    {
-        name:"Lal Bahadur Shastri",
-        term:"9 June, 1964 - 11 January, 1966"
-        ,url:"https://images.oneindia.com/elections/prime-ministers/Lal-Bahadur-Shastri.jpg"
-    },
-    {   
-        name:"Indira Gandhi",
-        term:"24 January, 1966 - 4 March, 1967 4 March, 1967 - 15 March, 1971 15 March, 1971 - 24 March, 1977 14 January, 1980 - 31 October, 1984"
-        ,url:"https://images.oneindia.com/elections/prime-ministers/Indira-Gandhi.jpg"
-    },
-    {
-        name:"Morarji Desai",
-        term:"24 March, 1977 - 28 July, 1979"
-        ,url:"https://images.oneindia.com/elections/prime-ministers/Morarji-Desai.jpg"
-    },
-    {
-        name:"Charan Singh",
-        term:"28 July, 1979 - 14 January, 1980"
-        ,url:"https://images.oneindia.com/elections/prime-ministers/Charan-Singh.jpg"
-    },
-    {
-        name:"Rajiv Gandhi",
-        term:"31 October, 1984 - 31 December, 1984 31 December, 1984 - 2 December, 1989"
-        ,url:"https://images.oneindia.com/elections/prime-ministers/Rajiv-Gandhi.jpg"
-    },
-    {
-        name:"Vishwanath Pratap Singh",
-        term:"2 December, 1989 - 10 November, 1990"
-        ,url:"https://images.oneindia.com/elections/prime-ministers/Vishwanath-Pratap-Singh.jpg"
-    },
-    {
-        name:"Chandra Shekhar",
-        term:"10 November, 1990 - 21 June, 1991"
-        ,url:"https://images.oneindia.com/elections/prime-ministers/Chandra-Shekhar.jpg"
-    },
-    {
-        name:"PV Narsimha Rao",
-        term:"21 June, 1991 - 16 May, 1996"
-        ,url:"https://images.oneindia.com/elections/prime-ministers/P-V-Narasimha-Rao.jpg"
-    },
-    {
-        name:"Atal Bihari Vajpayee",
-        term:"16 May, 1996 - 1 June, 1996 19 March, 1998 - 10 October, 1999 10 October, 1999 - 22 May, 2004"
-        ,url:"https://images.oneindia.com/elections/prime-ministers/Atal-Bihari-Vajpayee.jpg"
-    },
-    {
-        name:"HD Dave Godwa",
-        term:"1 June, 1996 - 21 April, 1997"
-        ,url:"https://images.oneindia.com/elections/prime-ministers/H-D-Deve-gowda.jpg"
-    },
-    {
-        name:"IK Gujral",
-        term:"21 April, 1997 - 19 March, 1998",
-        url:"https://images.oneindia.com/elections/prime-ministers/Inder-Kumar-Gujral.jpg"
-    },
-    {
-        name:"Manmohan Singh",
-        term:"22 May, 2004 - 22 May, 2009 22 May, 2009 - 26 May, 2014"
-        ,url:"https://images.oneindia.com/elections/prime-ministers/Manmohan-Singh.jpg"
-    },
-    {
-        name:"Narendra Modi",
-        term:"26 May, 2014 - 26 May, 2019 26 May, 2019 - Till date"
-        ,url:"https://images.oneindia.com/elections/prime-ministers/Narendra-Modi.jpg"
-    },
-]
-
-const getItem = (data, index) => ({
-  id: Math.random().toString(12).substring(0),
-  title: PMofIndiaInfoList[index].name,
-  term: PMofIndiaInfoList[index].term,
-  url:PMofIndiaInfoList[index].url
-});
-
-const getItemCount = () => PMofIndiaInfoList.length;
-
-
-const Item = ({ title, term, url }) => {
-    const imgurl =  url
-    return (
-  <View style={styles.item}>
-    <Text style={styles.title}>{title}</Text>
-    <br />
-    <Image
-    style={{width: 150, height: 150}} 
-        source={{
-          uri: imgurl,
-        }}
-      />
-      <br />
-    <Text >{term}</Text>
-    
-
-  </View>
-)};
+import { PMItemType, readPmList } from '../../services/pmData';
 
 const PMList = () => {
+  const [items, setItems] = useState<PMItemType[]>([]);
 
+  useEffect(() => {
+    readPmList().then(setItems);
+  }, []);
+
+  const renderItem = ({ item }: { item: PMItemType }) => (
+    <View style={styles.card}>
+      <Image source={{ uri: item.url }} style={styles.image} resizeMode="cover" />
+      <View style={styles.content}>
+        <Text style={styles.title}>{item.name}</Text>
+        <Text style={styles.term}>{item.term}</Text>
+      </View>
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.container}>
-      <VirtualizedList
-        data={PMofIndiaInfoList}
-        initialNumToRender={50}
-        renderItem={({ item }) => <Item title={item.title} term={item.term} url={item.url} />}
-        keyExtractor={item => item.id}
-        getItemCount={getItemCount}
-        getItem={getItem}
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.eyebrow}>Republic of India</Text>
+          <Text style={styles.headerTitle}>PM List</Text>
+          <Text style={styles.headerSubtitle}>Leaders who shaped modern India</Text>
+        </View>
+        <View style={styles.headerBadge}>
+          <Text style={styles.headerBadgeText}>{items.length}</Text>
+          <Text style={styles.headerBadgeLabel}>PMs</Text>
+        </View>
+      </View>
+      <FlatList
+        data={items}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
       />
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: StatusBar.currentHeight,
+    backgroundColor: '#f4f7f6',
+    paddingTop: StatusBar.currentHeight || 12,
+    paddingHorizontal: 16,
   },
-  item: {
-    backgroundColor: '#fafafa',
-    height: 350,
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: 12,
+    paddingBottom: 14,
+  },
+  eyebrow: {
+    color: '#0f766e',
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+    marginBottom: 5,
+  },
+  headerTitle: {
+    fontSize: 30,
+    fontWeight: '800',
+    color: '#102a43',
+    marginBottom: 3,
+  },
+  headerSubtitle: {
+    fontSize: 13,
+    color: '#627d98',
+    fontWeight: '600',
+  },
+  headerBadge: {
+    width: 58,
+    height: 58,
+    alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 8,
-    marginHorizontal: 16,
-    padding: 30,
+    backgroundColor: '#fff4e6',
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#f7c873',
+  },
+  headerBadgeText: {
+    color: '#b45309',
+    fontSize: 20,
+    fontWeight: '800',
+    lineHeight: 22,
+  },
+  headerBadgeLabel: {
+    color: '#b45309',
+    fontSize: 10,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  listContent: {
+    paddingBottom: 20,
+  },
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 10,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#d9e2ec',
+    shadowColor: '#102a43',
+    shadowOpacity: 0.08,
+    shadowRadius: 9,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+  },
+  image: {
+    width: 76,
+    height: 76,
+    borderRadius: 13,
+    backgroundColor: '#d9e2ec',
+  },
+  content: {
+    flex: 1,
+    marginLeft: 12,
+    paddingVertical: 2,
   },
   title: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '700',
+    color: '#102a43',
+    marginBottom: 6,
+  },
+  term: {
+    fontSize: 12.5,
+    lineHeight: 17,
+    color: '#627d98',
   },
 });
 

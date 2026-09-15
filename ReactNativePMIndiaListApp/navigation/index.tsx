@@ -48,16 +48,16 @@ function BottomTabNavigator() {
         name="TabOne"
         component={TabOneScreen}
         options={({ navigation }: RootTabScreenProps<'TabOne'>) => ({
-          title: 'Prime Ministers of India',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          title: 'PM List',
+          tabBarIcon: ({ color }) => <TabBarIcon name="list" color={color} />,
         })}
       />
       <BottomTab.Screen
         name="TabTwo"
         component={TabTwoScreen}
         options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          title: 'Edit Info',
+          tabBarIcon: ({ color }) => <TabBarIcon name="edit" color={color} />,
         }}
       />
     </BottomTab.Navigator>
