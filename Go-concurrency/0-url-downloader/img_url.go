@@ -3,12 +3,17 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 )
 
+const (
+	imageCount = 20
+	urlFile    = "image_urls.txt"
+)
+
 type Image struct {
+	// JSON tags map Go field names to the API's lower-case JSON keys.
 	ID          string `json:"id"`
 	Author      string `json:"author"`
 	Width       int    `json:"width"`
@@ -18,51 +23,38 @@ type Image struct {
 }
 
 func main() {
-	// Specify the number of random images to fetch
-	numImages := 20
-
-	// Fetch random image URLs
-	imageURLs, err := fetchRandomImageURLs(numImages)
+	imageURLs, err := fetchImageURLs(imageCount)
 	if err != nil {
 		fmt.Println("Error fetching image URLs:", err)
 		return
 	}
 
-	// Save URLs to a file
-	filePath := "image_urls.txt"
-	err = saveURLsToFile(imageURLs, filePath)
+	err = saveURLsToFile(imageURLs, urlFile)
 	if err != nil {
 		fmt.Println("Error saving URLs to file:", err)
 		return
 	}
-	fmt.Println("Image URLs saved to:", filePath)
+	fmt.Println("Image URLs saved to:", urlFile)
 }
 
-func fetchRandomImageURLs(numImages int) ([]string, error) {
-	url := fmt.Sprintf("https://picsum.photos/v2/list?page=2&limit=%d", numImages)
+func fetchImageURLs(limit int) ([]string, error) {
+	endpoint := fmt.Sprintf("https://picsum.photos/v2/list?page=2&limit=%d", limit)
 
-	resp, err := http.Get(url)
+	resp, err := http.Get(endpoint)
 	if err != nil {
 		return nil, err
 	}
+	// defer runs when this function returns, so the response body is always closed.
 	defer resp.Body.Close()
 
-	// Read the response body
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	// Extract URLs from the JSON response
 	var images []Image
-	err = json.Unmarshal(body, &images)
-	if err != nil {
+	if err := json.NewDecoder(resp.Body).Decode(&images); err != nil {
 		return nil, err
 	}
 
 	var imageURLs []string
-	for _, img := range images {
-		imageURLs = append(imageURLs, img.DownloadURL)
+	for _, image := range images {
+		imageURLs = append(imageURLs, image.DownloadURL)
 	}
 
 	return imageURLs, nil
@@ -73,6 +65,7 @@ func saveURLsToFile(urls []string, filePath string) error {
 	if err != nil {
 		return err
 	}
+	// defer also guarantees that the file is closed on both success and failure.
 	defer file.Close()
 
 	for _, url := range urls {

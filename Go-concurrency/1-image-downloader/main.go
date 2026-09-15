@@ -14,38 +14,27 @@ import (
 	"time"
 )
 
+const (
+	inputFile       = "image_urls.txt"
+	statsFile       = "stats.csv"
+	sequentialDir  = "sequential_downloads"
+	concurrentDir  = "concurrent_downloads"
+)
+
 func main() {
-	// Define paths
-	csvFilePath := "stats.csv"
-
-	// File containing image URLs
-	filePath := "image_urls.txt"
-
-	// Directories to save downloaded images
-	sequentialDir := "sequential_downloads"
-	concurrentDir := "concurrent_downloads"
-
-	// Create directories
-	err := createDirectory(sequentialDir)
-	if err != nil {
-		fmt.Println("Error creating directory:", err)
-		return
+	for _, directory := range []string{sequentialDir, concurrentDir} {
+		if err := createDirectory(directory); err != nil {
+			fmt.Println("Error creating directory:", err)
+			return
+		}
 	}
 
-	err = createDirectory(concurrentDir)
-	if err != nil {
-		fmt.Println("Error creating directory:", err)
-		return
-	}
-
-	// Read URLs from file
-	urls, err := readURLsFromFile(filePath)
+	urls, err := readURLsFromFile(inputFile)
 	if err != nil {
 		fmt.Println("Error reading URLs from file:", err)
 		return
 	}
 
-	// Sequentially download images
 	seqTimings, seqTotalTime, err := downloadImagesSequentially(urls, sequentialDir)
 	if err != nil {
 		fmt.Println("Error downloading images sequentially:", err)
@@ -53,7 +42,6 @@ func main() {
 	}
 	fmt.Printf("Sequential download took: %v\n", seqTotalTime)
 
-	// Concurrently download images
 	concTimings, concTotalTime, err := downloadImagesConcurrently(urls, concurrentDir)
 	if err != nil {
 		fmt.Println("Error downloading images concurrently:", err)
@@ -61,17 +49,17 @@ func main() {
 	}
 	fmt.Printf("Concurrent download took: %v\n", concTotalTime)
 
-	// Save download timings to CSV
-	err = saveStatsToCSV(seqTimings, concTimings, csvFilePath)
+	err = saveStatsToCSV(seqTimings, concTimings, statsFile)
 	if err != nil {
 		fmt.Println("Error saving stats to CSV:", err)
 		return
 	}
 
-	fmt.Println("Download stats saved to:", csvFilePath)
+	fmt.Println("Download stats saved to:", statsFile)
 }
 
 func createDirectory(dir string) error {
+	// 0755 gives the owner write access and everyone read/execute access.
 	err := os.Mkdir(dir, 0755)
 	if err != nil && !os.IsExist(err) {
 		return err
@@ -84,6 +72,7 @@ func readURLsFromFile(filePath string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
+	// defer is Go's usual cleanup pattern; the file closes when this function returns.
 	defer file.Close()
 
 	var urls []string
@@ -101,7 +90,8 @@ func readURLsFromFile(filePath string) ([]string, error) {
 
 func downloadImagesSequentially(urls []string, dir string) ([]time.Duration, time.Duration, error) {
 	var timings []time.Duration
-	start := time.Now() // Capture start time for sequential download
+	// time.Duration is Go's type for elapsed time values.
+	start := time.Now()
 
 	for _, url := range urls {
 		err := downloadImage(url, dir)
@@ -109,7 +99,7 @@ func downloadImagesSequentially(urls []string, dir string) ([]time.Duration, tim
 			fmt.Printf("Error downloading image %s: %v\n", url, err)
 			continue
 		}
-		duration := time.Since(start) // Calculate time elapsed since download start
+		duration := time.Since(start)
 		timings = append(timings, duration)
 		fmt.Printf("Downloaded image %s in %v\n", url, duration)
 	}
@@ -118,49 +108,56 @@ func downloadImagesSequentially(urls []string, dir string) ([]time.Duration, tim
 }
 
 func downloadImagesConcurrently(urls []string, dir string) ([]time.Duration, time.Duration, error) {
+	workerCount := int(math.Sqrt(float64(len(urls))))
+	if workerCount == 0 {
+		workerCount = 1
+	}
+
+	// WaitGroup counts workers so the function can wait for all goroutines.
 	var wg sync.WaitGroup
-	numWorkers := int(math.Sqrt(float64(len(urls)))) // Number of concurrent workers
-	wg.Add(numWorkers)
+	wg.Add(workerCount)
+	start := time.Now()
 
-	var timings []time.Duration
-	start := time.Now() // Capture start time for concurrent download
+	// Channels are typed queues used to pass work between goroutines.
+	jobs := make(chan string)
+	completedTimings := make(chan time.Duration, len(urls))
 
-	jobs := make(chan string, len(urls))
-	results := make(chan time.Duration, len(urls))
-
-	// Create workers
-	for i := 0; i < numWorkers; i++ {
+	for i := 0; i < workerCount; i++ {
+		// The go keyword starts this function concurrently.
 		go func() {
+			// defer runs when the worker exits, even after the jobs loop ends.
 			defer wg.Done()
+			// Ranging over a channel receives values until the channel is closed.
 			for url := range jobs {
-				err := downloadImage(url, dir)
-				if err != nil {
+				if err := downloadImage(url, dir); err != nil {
 					fmt.Printf("Error downloading image %s: %v\n", url, err)
-					results <- 0 // Signal error
 					continue
 				}
-				duration := time.Since(start) // time elapsed till start
-				timings = append(timings, duration)
-				results <- duration
+				duration := time.Since(start)
+				completedTimings <- duration
 				fmt.Printf("Downloaded image %s in %v\n", url, duration)
 			}
 		}()
 	}
 
-	// Queue jobs
+	// Sending blocks until a worker receives the URL from the jobs channel.
 	for _, url := range urls {
 		jobs <- url
 	}
+	// Closing tells workers that no more URLs will be sent.
 	close(jobs)
 
-	// Wait for all workers to finish
+	// Wait before closing completedTimings so no worker can send to a closed channel.
 	wg.Wait()
-	close(results)
+	close(completedTimings)
 
-	// Calculate total concurrent download time
-	var totalDuration = timings[len(timings)-1]
+	var timings []time.Duration
+	// This range collects values until the workers' channel is closed.
+	for timing := range completedTimings {
+		timings = append(timings, timing)
+	}
 
-	return timings, totalDuration, nil
+	return timings, time.Since(start), nil
 }
 
 func downloadImage(url string, dir string) error {
@@ -168,6 +165,7 @@ func downloadImage(url string, dir string) error {
 	if err != nil {
 		return err
 	}
+	// The response body must be closed separately from the output file.
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
@@ -183,6 +181,7 @@ func downloadImage(url string, dir string) error {
 	if err != nil {
 		return err
 	}
+	// The file is closed automatically when downloadImage returns.
 	defer file.Close()
 
 	// Write the image content to the file
