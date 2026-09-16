@@ -3,10 +3,12 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import pandas as pd
 import numpy as np
+from pathlib import Path
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-df = pd.read_csv("static/movie_dataset.csv")
+STATIC_DIR = Path(__file__).resolve().parents[2] / "static"
+df = pd.read_csv(STATIC_DIR / "movie_dataset.csv")
 
 print('keeping the movie data in the memory for quicker response\n')
 # print(df_poster['movie-name'])
@@ -14,17 +16,15 @@ print('\n')
 
 poster = {}
 
-with open("static/movie_poster.csv","r") as f:
-  counter = 0
-  for line in f:
-    counter += 1
-
-    x = f.readline().split(",")
-    n = x[0].strip()
-    name = x[1].strip()
-    img_url = x[2].strip()
-    if img_url: 
-      poster[name] = img_url
+with open(STATIC_DIR / "movie_poster.csv", encoding="utf-8") as poster_file:
+  next(poster_file, None)
+  for line in poster_file:
+    fields = line.rstrip("\n").split(",", 2)
+    if len(fields) == 3:
+      name = fields[1].strip()
+      img_url = fields[2].rstrip(",").strip()
+      if img_url:
+        poster[name] = img_url
 
   # print("printing the poster urls",poster[str("Batman v Superman: Dawn of Justice")],"count : ",counter,"\n")
   # print("\n ",poster," \n")

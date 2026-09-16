@@ -15,26 +15,17 @@ Python:
 
 6. MachineLearningTutorials
 7. movie-recommendation
-8. InstagramSeleniumBot
-9. FareCollectorSeleniumPy
-10. llm-gen-ai
-11. ai-agents
+8. llm-gen-ai
+9. ai-agents
 
-Android
-
-12. QuoteAppMVVM
-
-PHP 
-
-13. PHP-assignment
    
 Go & Rust
 
-14. Go-concurrency
-15. Rust-Folder-Copy
+10. Go-concurrency
+11. Rust-Folder-Copy
 
 Deploy
 
-16. deploy with docker compose
-17. deploy with Kubernetes
+12. deploy with docker compose
+13. deploy with Kubernetes
 
