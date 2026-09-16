@@ -43,6 +43,38 @@ cp ../1-image-downloader/stats.csv .
 go run plot.go
 ```
 
+## Generating `explain.md` with AI in VS Code
+
+The detailed learning notes in each folder can be created with the AI assistant in VS Code. This is useful when you want an explanation that is specific to the code in that folder rather than a general Go tutorial.
+
+### Steps
+
+1. Open this repository in VS Code.
+2. Open the folder or source file you want to understand, such as `0-url-downloader/img_url.go`.
+3. Open GitHub Copilot Chat and ask it to read the source file and the nearby project files.
+4. Ask the assistant to create an `explain.md` file in that folder. Include the concepts you want explained, such as the JavaScript mental model, error handling, `defer`, file I/O, goroutines, channels, or plotting.
+5. Review the generated explanation against the source code. Make sure function names, file names, output paths, and behavior are accurate.
+6. Repeat the process for `1-image-downloader` and `2-plotter`.
+
+For example, this prompt can be used in Copilot Chat:
+
+```text
+Read the Go files in this folder and create an explain.md file here.
+Explain what the program does step by step using a JavaScript or TypeScript
+mental model where useful. Cover the important Go concepts, error handling,
+resource cleanup, concurrency, input/output files, and timing behavior.
+Use the actual function and variable names from the code. Keep the explanation
+beginner-friendly, and verify it against the source before finishing.
+```
+
+The resulting files are:
+
+- `0-url-downloader/explain.md`: explains fetching image URLs and saving them to a file.
+- `1-image-downloader/explain.md`: explains sequential downloads, worker goroutines, channels, and timing data.
+- `2-plotter/explain.md`: explains CSV parsing and creating the Gonum chart.
+
+AI-generated documentation should be treated like code: check it against the implementation, especially when the source changes.
+
 ## How the code works
 
 ### 1. Fetching URLs: `0-url-downloader/img_url.go`

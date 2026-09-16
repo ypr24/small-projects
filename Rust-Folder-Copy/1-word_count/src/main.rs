@@ -3,6 +3,7 @@ use std::fs;
 use std::io;
 
 fn main() -> io::Result<()> {
+    
     // Collect command-line arguments
     let args: Vec<String> = env::args().collect();
 
