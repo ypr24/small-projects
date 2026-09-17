@@ -95,18 +95,20 @@ def recommendation(movie_name,N=5):
   return recommended_list
 
 def search(movie_startWith, N=5):
+  query = str(movie_startWith or '').strip().casefold()
+  if not query:
+    return []
 
-  # print('movie_startWith = ', movie_startWith, ' N = ',N)
-  # capitalize the first letter in case if user give 
-  # input in small letter
-  movie_startWith = movie_startWith.capitalize()
+  titles = df['original_title'].fillna('').astype(str).tolist()
+  normalized_titles = [title.casefold() for title in titles]
 
-  some_list = df.loc[:,"original_title"].values.tolist()
-  result = filter(lambda x: x.startswith(movie_startWith), some_list)
-  filtered_list = list(result)
-  # print(' Getting the list of search \n',filtered_list)
-  
-  return filtered_list[0:int(N)+1]
+  # Prefer titles that begin with the query, then include word and substring
+  # matches so a slightly incomplete search still produces useful choices.
+  prefix_matches = [title for title, normalized in zip(titles, normalized_titles)
+                    if normalized.startswith(query)]
+  remaining_matches = [title for title, normalized in zip(titles, normalized_titles)
+                       if query in normalized and not normalized.startswith(query)]
+  return (prefix_matches + remaining_matches)[:int(N) + 1]
 
 
 
