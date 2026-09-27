@@ -1,9 +1,13 @@
 import json
+from dotenv import load_dotenv
+
 from phi.agent.duckdb import DuckDbAgent
 from phi.model.groq import Groq
 
+load_dotenv()
+
 DuckDbAIAgent_analyst = DuckDbAgent(
-    model=Groq(id="llama-3.3-70b-versatile"),  
+    model=Groq(id="openai/gpt-oss-120b"),
     semantic_model=json.dumps(
         {
             "tables": [

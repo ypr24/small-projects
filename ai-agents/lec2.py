@@ -30,11 +30,12 @@ def get_company_symbol(company: str) -> str:
 
 
 agent = Agent(
-    model=Groq(id="llama-3.3-70b-versatile"),
+    model=Groq(id="openai/gpt-oss-120b"),
     tools=[YFinanceTools(stock_price=True, analyst_recommendations=True, stock_fundamentals=True), get_company_symbol],
     instructions=[
         "Use tables to display data.",
-        "If you need to find the symbol for a company, use the get_company_symbol tool.",
+        "Resolve company names with get_company_symbol before using finance tools, and use its returned symbol exactly.",
+        "Phidata maps to MSFT, so label that data as Microsoft (MSFT); never invent a PHID ticker.",
     ],
     show_tool_calls=True,
     markdown=True,
@@ -42,5 +43,5 @@ agent = Agent(
 )
 
 agent.print_response(
-    "Summarize and compare analyst recommendations and fundamentals for TSLA and Phidata. Show in tables.", stream=True
+    "Summarize and compare analyst recommendations and fundamentals for TSLA and Phidata. Resolve Phidata using get_company_symbol. Show in tables.", stream=True
 )

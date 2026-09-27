@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 agent = Agent(
-    model=Groq(id="llama-3.3-70b-versatile"),
+    model=Groq(id="openai/gpt-oss-20b"),
     markdown=True
 )
 
